@@ -93,7 +93,7 @@ export default function HomePage() {
         data: clockSlices,
         backgroundColor: clockColors,
         borderColor: '#2e2e2e',
-        borderWidth: 8,
+        borderWidth: 4,
       },
     ],
   };
