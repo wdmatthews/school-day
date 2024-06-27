@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect } from 'react';
-import { Text, Grid, Card } from '@mantine/core';
+import { Text, Grid, Card, Paper } from '@mantine/core';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
 import { Pie } from "react-chartjs-2";
 
@@ -32,8 +32,8 @@ export default function HomePage() {
   const clockLabels:string[] = [];
   const clockColors:string[] = [];
   const clockSlices:number[] = [];
-  const dayStart = 8 * 60 + 30;
-  const dayEnd = 15 * 60 + 30;
+  const dayStart = courses[0].start;
+  const dayEnd = courses[courses.length - 1].end;
   const dayLength = dayEnd - dayStart;
   
   courses.forEach(course => {
@@ -65,63 +65,100 @@ export default function HomePage() {
     },
   };
   
-  const currentCourseIndex = 1;
-  const currentCourse = courses[currentCourseIndex];
-  const nextCourse = courses[currentCourseIndex + 1];
-  let startHour = Math.floor(currentCourse.start / 60);
-  const startZone = startHour < 12 || startHour === 24 ? 'AM' : 'PM';
-  if (startHour > 12) startHour -= 12;
-  const startMinutes = currentCourse.start % 60;
-  let endHour = Math.floor(currentCourse.end / 60);
-  const endZone = endHour < 12 || endHour === 24 ? 'AM' : 'PM';
-  if (endHour > 12) endHour -= 12;
-  const endMinutes = currentCourse.end % 60;
-  const currentTime = 11 * 60 + 0;
-  const timeLeft = currentCourse.end - currentTime;
-  let nextHour = Math.floor(nextCourse.start / 60);
-  const nextZone = nextHour < 12 || nextHour === 24 ? 'AM' : 'PM';
-  if (nextHour > 12) nextHour -= 12;
-  const nextMinutes = nextCourse.start % 60;
+  let currentTime = 0;
+  let currentCourseIndex = 0;
+  let currentCourse:any = null;
+  let startHour = 0;
+  let startZone = '';
+  let startMinutes = 0;
+  let endHour = 0;
+  let endZone = '';
+  let endMinutes = 0;
+  let timeLeft = 0;
+  let previousTimeLeft = 0;
+  let nextCourse:any = null;
+  let nextHour = 0;
+  let nextZone = '';
+  let nextMinutes = 0;
+  let handAngle = 0;
+  
+  function updateTime() {
+    const currentDate = new Date();
+    currentTime = currentDate.getHours() * 60 + currentDate.getMinutes();
+    
+    for (let c = 0; c < courses.length; c++) {
+      const course = courses[c];
+      
+      if (currentTime >= course.start && currentTime <= course.end) {
+        currentCourseIndex = c;
+        break;
+      }
+    }
+    
+    currentCourse = courses[currentCourseIndex];
+    startHour = Math.floor(currentCourse.start / 60);
+    startZone = startHour < 12 || startHour === 24 ? 'AM' : 'PM';
+    if (startHour > 12) startHour -= 12;
+    startMinutes = currentCourse.start % 60;
+    endHour = Math.floor(currentCourse.end / 60);
+    endZone = endHour < 12 || endHour === 24 ? 'AM' : 'PM';
+    if (endHour > 12) endHour -= 12;
+    endMinutes = currentCourse.end % 60;
+    previousTimeLeft = timeLeft;
+    timeLeft = currentCourse.end - currentTime;
+    
+    nextCourse = currentCourseIndex < courses.length - 1 ? courses[currentCourseIndex + 1] : null;
+    nextHour = nextCourse ? Math.floor(nextCourse.start / 60) : 0;
+    nextZone = nextHour < 12 || nextHour === 24 ? 'AM' : 'PM';
+    if (nextHour > 12) nextHour -= 12;
+    nextMinutes = nextCourse ? nextCourse.start % 60 : 0;
+    handAngle = (currentTime - dayStart) / (dayEnd - dayStart) * 360 - 90;
+    
+    if (previousTimeLeft != timeLeft) {
+      if (timeLeft === currentCourse.end - currentCourse.start) {
+        console.log('Class has started!');
+      }
+      
+      if (timeLeft === 5) {
+        console.log('5 minutes left!');
+      }
+      
+      if (timeLeft === 0) {
+        console.log('Class is over!');
+      }
+    }
+  }
+  
+  updateTime();
   
   useEffect(() => {
-    setTimeout(() => {
-      const handCanvasElem:HTMLCanvasElement = document.getElementById('handCanvas') as HTMLCanvasElement;
-      const handCanvas = handCanvasElem.getContext("2d")!;
-      handCanvas.beginPath();
-      handCanvas.moveTo(handCanvasElem.width / 2, handCanvasElem.height / 2);
-      handCanvas.lineTo(0, 0);
-      handCanvas.closePath();
-      handCanvas.strokeStyle = "white";
-      handCanvas.lineWidth = 4;
-      handCanvas.lineCap = "round";
-      handCanvas.stroke();
-    }, 1000);
+    setInterval(updateTime, 5000);
   });
   
   return (<>
     <Card m="md" p="md" radius="md">
       <Grid align="center" justify="center">
         <Grid.Col span={{ base: 6, md: 4 }} pos="relative">
-          <Pie data={clockData} options={clockOptions} style={{ marginLeft: "auto" }}></Pie>
-          <canvas id="handCanvas" style={{ position: "absolute", left: 0, top: 0, width: "100%", height: "100%" }}></canvas>
+          <Pie data={clockData} options={clockOptions}></Pie>
+          <Paper bg="white" radius="xl" style={{ position: "absolute", left: "50%", top: "50%", width: "50%", height: "16px", transformOrigin: "8px 8px", translate: "-8px -8px", rotate: `${handAngle}deg` }}></Paper>
         </Grid.Col>
         <Grid.Col span={{ base: 6, md: 4 }}>
-          <Text fw={700} size="xl" c={currentCourse.color}>
-            {currentCourse.name}
+          <Text fw={700} size="xl" c={currentCourse?.color} display={timeLeft > 0 ? "block" : "none"}>
+            {currentCourse?.name}
           </Text>
-          <Text>
+          <Text display={timeLeft > 0 ? "block" : "none"}>
             {startHour.toFixed(0).padStart(2, '0')}:{startMinutes.toFixed(0).padStart(2, '0')} {startZone}
             &nbsp;- {endHour.toFixed(0).padStart(2, '0')}:{endMinutes.toFixed(0).padStart(2, '0')} {endZone}
           </Text>
-          <Text fw={900} size="xl" c="white" tt="uppercase" mt="md">{timeLeft}</Text>
-          <Text fw={900} size="xl" c="white" tt="uppercase" mb="md">minutes left</Text>
-          <Text size="sm" tt="uppercase" fw={700}>
+          <Text fw={900} size="xl" c="white" tt="uppercase" mt="md">{timeLeft > 0 ? timeLeft : "Passing period"}</Text>
+          <Text fw={900} size="xl" c="white" tt="uppercase" display={timeLeft > 0 ? "block" : "none"}>minutes left</Text>
+          <Text size="sm" tt="uppercase" fw={700} mt="md" display={nextCourse ? "block" : "none"}>
             Next
           </Text>
-          <Text fw={700} size="lg" c={nextCourse.color}>
-            {nextCourse.name}
+          <Text fw={700} size="lg" c={nextCourse?.color} display={nextCourse ? "block" : "none"}>
+            {nextCourse?.name}
           </Text>
-          <Text>
+          <Text display={nextCourse ? "block" : "none"}>
             at {nextHour.toFixed(0).padStart(2, '0')}:{nextMinutes.toFixed(0).padStart(2, '0')} {nextZone}
           </Text>
         </Grid.Col>
