@@ -2,6 +2,8 @@ import "@mantine/core/styles.css";
 import React from "react";
 import { MantineProvider, ColorSchemeScript } from "@mantine/core";
 import { theme } from "../theme";
+import '@mantine/notifications/styles.css';
+import { Notifications } from '@mantine/notifications';
 
 export const metadata = {
   title: "School Day",
@@ -19,7 +21,10 @@ export default function RootLayout({ children }: { children: any }) {
         />
       </head>
       <body>
-        <MantineProvider theme={theme} defaultColorScheme="dark">{children}</MantineProvider>
+        <MantineProvider theme={theme} defaultColorScheme="dark">
+          <Notifications position="bottom-left" />
+          {children}
+        </MantineProvider>
       </body>
     </html>
   );
