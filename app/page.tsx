@@ -1,5 +1,7 @@
 "use client";
 
+// TODO: FIX BUG WHERE UPDATE DOES NOT OCCUR ON INFORMATION WHEN TIME IS CHANGED
+
 import React, { useEffect } from 'react';
 import { Text, Grid, Card, Paper } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
@@ -15,60 +17,70 @@ export default function HomePage() {
       color: '#fa5252',
       start: 8 * 60 + 30,
       end: 9 * 60 + 12,
+      shouldWarn: false,
     },
     {
       name: 'Biology 2',
       color: '#ffa8a8',
       start: 9 * 60 + 16,
       end: 9 * 60 + 58,
+      shouldWarn: true,
     },
     {
       name: 'Enviro Sci 3',
       color: '#fd7e14',
       start: 10 * 60 + 2,
       end: 10 * 60 + 44,
+      shouldWarn: true,
     },
     {
       name: 'Biology 4',
       color: '#ffc078',
       start: 10 * 60 + 48,
       end: 11 * 60 + 30,
+      shouldWarn: true,
     },
     {
       name: 'Biology 5',
       color: '#fab005',
       start: 11 * 60 + 34,
       end: 12 * 60 + 16,
+      shouldWarn: true,
     },
     {
       name: 'Lunch',
       color: '#ffe066',
       start: 12 * 60 + 20,
       end: 12 * 60 + 50,
+      shouldWarn: false,
     },
     {
       name: 'Honors Bio 6',
       color: '#40c057',
       start: 12 * 60 + 54,
       end: 13 * 60 + 36,
+      shouldWarn: true,
     },
     {
       name: 'A & P 7',
       color: '#8ce99a',
       start: 13 * 60 + 40,
       end: 14 * 60 + 22,
+      shouldWarn: true,
     },
     {
       name: 'Plan',
       color: '#228be6',
       start: 14 * 60 + 26,
       end: 15 * 60 + 8,
+      shouldWarn: false,
     },
     {
       name: 'Homeroom',
       color: '#74c0fc',
       start: 15 * 60 + 12,
       end: 15 * 60 + 30,
+      shouldWarn: false,
     },
   ];
   
@@ -166,32 +178,12 @@ export default function HomePage() {
     handAngle = (currentTime - dayStart) / (dayEnd - dayStart) * 360 - 90;
     
     if (currentCourse && previousTimeLeft != timeLeft && startAudio) {
-      if (timeLeft === currentCourse.end - currentCourse.start) {
-        startAudio?.play();
-        notifications.show({
-          title: `${currentCourse.name} started!`,
-          message: '',
-          style: { backgroundColor: '#37b24d' },
-          ...notificationsCustomization,
-        })
-      }
-      
-      if (timeLeft === 5) {
+      if (timeLeft === 3 && currentCourse.shouldWarn) {
         warningAudio?.play();
         notifications.show({
-          title: `5 minutes left of ${currentCourse.name}!`,
+          title: `3 minutes left of ${currentCourse.name}!`,
           message: '',
           style: { backgroundColor: '#f76707' },
-          ...notificationsCustomization,
-        })
-      }
-      
-      if (timeLeft === 0) {
-        endAudio?.play();
-        notifications.show({
-          title: `${currentCourse.name} ended!`,
-          message: '',
-          style: { backgroundColor: '#f03e3e' },
           ...notificationsCustomization,
         })
       }
