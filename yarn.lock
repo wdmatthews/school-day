@@ -197,12 +197,51 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@mantine/dates@npm:^7.11.0":
+  version: 7.11.0
+  resolution: "@mantine/dates@npm:7.11.0"
+  dependencies:
+    clsx: "npm:^2.1.1"
+  peerDependencies:
+    "@mantine/core": 7.11.0
+    "@mantine/hooks": 7.11.0
+    dayjs: ">=1.0.0"
+    react: ^18.2.0
+    react-dom: ^18.2.0
+  checksum: 10c0/7a9b6d817cec775a95943631792a670e58d16e7c4eec237f2be3f758c0a212ed26510bf8292f3c5ebf8d5b36a794a267f848fcd6955f245e02d156a8e25e9ed7
+  languageName: node
+  linkType: hard
+
+"@mantine/form@npm:^7.11.0":
+  version: 7.11.0
+  resolution: "@mantine/form@npm:7.11.0"
+  dependencies:
+    fast-deep-equal: "npm:^3.1.3"
+    klona: "npm:^2.0.6"
+  peerDependencies:
+    react: ^18.2.0
+  checksum: 10c0/21d84b7becc88d397e15d6053ccfac7eda333c0824d601857ca5637eb27face6ea284efb2970a670658846789ec7a5e0761dc328d58f18d0335e61511a19c5ba
+  languageName: node
+  linkType: hard
+
 "@mantine/hooks@npm:7.11.0":
   version: 7.11.0
   resolution: "@mantine/hooks@npm:7.11.0"
   peerDependencies:
     react: ^18.2.0
   checksum: 10c0/5fb96b46145f0f1fbbe2a4934ce26e374e59dfc4b0d7b1f0b96e4d9a93997315bb57e5d2747331648e33280669404555a52b0e9857bb8b81b1121fe02eede5ac
+  languageName: node
+  linkType: hard
+
+"@mantine/modals@npm:^7.11.0":
+  version: 7.11.0
+  resolution: "@mantine/modals@npm:7.11.0"
+  peerDependencies:
+    "@mantine/core": 7.11.0
+    "@mantine/hooks": 7.11.0
+    react: ^18.2.0
+    react-dom: ^18.2.0
+  checksum: 10c0/f994dc9932789718066c95ebc1510502cb56b54f7192e270dbe4a72d3460df38ba98c025005916901e9bee624180a4212b8421eff4a893dd7505c60d316cda2c
   languageName: node
   linkType: hard
 
@@ -933,6 +972,13 @@ __metadata:
   version: 1.0.8
   resolution: "damerau-levenshtein@npm:1.0.8"
   checksum: 10c0/4c2647e0f42acaee7d068756c1d396e296c3556f9c8314bac1ac63ffb236217ef0e7e58602b18bb2173deec7ec8e0cac8e27cccf8f5526666b4ff11a13ad54a3
+  languageName: node
+  linkType: hard
+
+"dayjs@npm:^1.11.11":
+  version: 1.11.11
+  resolution: "dayjs@npm:1.11.11"
+  checksum: 10c0/0131d10516b9945f05a57e13f4af49a6814de5573a494824e103131a3bbe4cc470b1aefe8e17e51f9a478a22cd116084be1ee5725cedb66ec4c3f9091202dc4b
   languageName: node
   linkType: hard
 
@@ -2443,6 +2489,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"klona@npm:^2.0.6":
+  version: 2.0.6
+  resolution: "klona@npm:2.0.6"
+  checksum: 10c0/94eed2c6c2ce99f409df9186a96340558897b3e62a85afdc1ee39103954d2ebe1c1c4e9fe2b0952771771fa96d70055ede8b27962a7021406374fdb695fd4d01
+  languageName: node
+  linkType: hard
+
 "language-subtag-registry@npm:^0.3.20":
   version: 0.3.22
   resolution: "language-subtag-registry@npm:0.3.22"
@@ -3368,12 +3421,16 @@ __metadata:
   resolution: "school-day@workspace:."
   dependencies:
     "@mantine/core": "npm:7.11.0"
+    "@mantine/dates": "npm:^7.11.0"
+    "@mantine/form": "npm:^7.11.0"
     "@mantine/hooks": "npm:7.11.0"
+    "@mantine/modals": "npm:^7.11.0"
     "@mantine/notifications": "npm:^7.11.0"
     "@types/node": "npm:20.14.8"
     "@types/react": "npm:18.3.3"
     "@types/react-dom": "npm:18.3.0"
     chart.js: "npm:^4.4.3"
+    dayjs: "npm:^1.11.11"
     eslint: "npm:8.57.0"
     eslint-config-next: "npm:14.2.4"
     next: "npm:14.2.4"
