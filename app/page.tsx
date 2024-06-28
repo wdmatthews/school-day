@@ -46,22 +46,19 @@ export default function HomePage() {
   };
   
   const [currentCourse, setCurrentCourse] = useState<any>(null);
-  const [startHour, setStartHour] = useState(0);
-  const [startZone, setStartZone] = useState('');
-  const [startMinutes, setStartMinutes] = useState(0);
-  const [endHour, setEndHour] = useState(0);
-  const [endZone, setEndZone] = useState('');
-  const [endMinutes, setEndMinutes] = useState(0);
   const [timeLeft, setTimeLeft] = useState(0);
-  const [previousTimeLeft, setPreviousTimeLeft] = useState(0);
   const [nextCourse, setNextCourse] = useState<any>(null);
-  const [nextHour, setNextHour] = useState(0);
-  const [nextZone, setNextZone] = useState('');
-  const [nextMinutes, setNextMinutes] = useState(0);
   const [handAngle, setHandAngle] = useState(0);
   
   const currentDate = useRef<Date>(new Date());
-  const currentTime = useRef(0);
+  
+  function formatTime(time:number) {
+    let hour = Math.floor(time / 60);
+    const zone = hour < 12 || hour === 24 ? 'AM' : 'PM';
+    if (hour > 12) hour -= 12;
+    const minutes = time % 60;
+    return `${hour.toFixed(0).padStart(2, '0')}:${minutes.toFixed(0).padStart(2, '0')} ${zone}`;
+  }
   
   const updateTime = useCallback((updateCourses:any[] | null, warningAudio?:any) => {
     if (!updateCourses) updateCourses = courses;
@@ -70,6 +67,7 @@ export default function HomePage() {
       autoClose: 5000,
     };
     
+    const currentTime = currentDate.current.getHours() * 60 + currentDate.current.getMinutes();
     let currentCourseIndex = -1;
     
     for (let c = 0; c < updateCourses.length; c++) {
@@ -83,81 +81,74 @@ export default function HomePage() {
       }
     }
     
-    setCurrentCourse(currentCourseIndex >= 0 ? updateCourses[currentCourseIndex] : null);
-    setStartHour(currentCourse ? Math.floor(currentCourse.start / 60) : 0);
-    setStartZone(startHour < 12 || startHour === 24 ? 'AM' : 'PM');
-    if (startHour > 12) setStartHour(startHour - 12);
-    setStartMinutes(currentCourse ? currentCourse.start % 60 : 0);
-    setEndHour(currentCourse ? Math.floor(currentCourse.end / 60) : 0);
-    setEndZone(endHour < 12 || endHour === 24 ? 'AM' : 'PM');
-    if (endHour > 12) setEndHour(endHour - 12);
-    setEndMinutes(currentCourse ? currentCourse.end % 60 : 0);
-    setPreviousTimeLeft(timeLeft);
-    setTimeLeft(currentCourse ? currentCourse.end - currentTime.current : 0);
-    
+    const course = currentCourseIndex >= 0 ? updateCourses[currentCourseIndex] : null;
+    setCurrentCourse(course);
+    let newTimeLeft = course ? course.end - currentTime : 0;
     setNextCourse(currentCourseIndex < updateCourses.length - 1 ? updateCourses[currentCourseIndex + 1] : null);
-    setNextHour(nextCourse ? Math.floor(nextCourse.start / 60) : 0);
-    setNextZone(nextHour < 12 || nextHour === 24 ? 'AM' : 'PM');
-    if (nextHour > 12) setNextHour(nextHour - 12);
-    setNextMinutes(nextCourse ? nextCourse.start % 60 : 0);
-    setHandAngle((currentTime.current - dayStart) / (dayEnd - dayStart) * 360 - 90);
+    setHandAngle((currentTime - dayStart) / (dayEnd - dayStart) * 360 - 90);
     
-    if (currentCourse && previousTimeLeft != timeLeft && warningAudio) {
-      if (timeLeft === 3 && currentCourse.shouldWarn) {
+    if (course && timeLeft != newTimeLeft && warningAudio) {
+      if (newTimeLeft === 3 && course.shouldWarn) {
         warningAudio?.play();
         notifications.show({
-          title: `3 minutes left of ${currentCourse.name}!`,
+          title: `3 minutes left of ${course.name}!`,
           message: '',
           style: { backgroundColor: '#f76707' },
           ...notificationsCustomization,
         })
       }
     }
-  }, [currentTime, courses, currentCourse, dayEnd, dayStart, endHour, nextCourse, nextHour, previousTimeLeft, startHour, timeLeft]);
+    
+    setTimeLeft(newTimeLeft);
+  }, [currentDate, courses, dayEnd, dayStart, timeLeft]);
   
   const coursesString = useSearchParams().get('courses') ?? '';
   
   useEffect(() => {
-    if (courses.length > 0) return;
-    const urlCourses:any[] = [];
-    
-    if (coursesString.length > 0) {
-      const coursesStrings = coursesString.split('|');
-      const urlClockLabels:string[] = [];
-      const urlClockColors:string[] = [];
-      const urlClockSlices:number[] = [];
+    function getUrlCourses(urlString:string) {
+      const urlCourses:any[] = [];
       
-      coursesStrings.forEach(courseString => {
-        const courseStrings = courseString.split(';');
-        const urlCourse = {
-          name: courseStrings[0],
-          color: `#${courseStrings[1]}`,
-          start: Number(courseStrings[2]),
-          end: Number(courseStrings[3]),
-          shouldWarn: courseStrings[4] === 'true',
-        };
-        urlCourses.push(urlCourse);
-        urlClockLabels.push(urlCourse.name);
-        urlClockColors.push(urlCourse.color);
-        urlClockSlices.push((urlCourse.end - urlCourse.start) / dayLength);
-      });
-      
-      if (urlCourses.length > 0) {
-        setCourses(urlCourses);
-        setClockLabels(urlClockLabels);
-        setClockColors(urlClockColors);
-        setClockSlices(urlClockSlices);
+      if (urlString.length > 0) {
+        const coursesStrings = urlString.split('|');
+        const urlClockLabels:string[] = [];
+        const urlClockColors:string[] = [];
+        const urlClockSlices:number[] = [];
+        
+        coursesStrings.forEach(courseString => {
+          const courseStrings = courseString.split(';');
+          const urlCourse = {
+            name: courseStrings[0],
+            color: `#${courseStrings[1]}`,
+            start: Number(courseStrings[2]),
+            end: Number(courseStrings[3]),
+            shouldWarn: courseStrings[4] === 'true',
+          };
+          urlCourses.push(urlCourse);
+          urlClockLabels.push(urlCourse.name);
+          urlClockColors.push(urlCourse.color);
+          urlClockSlices.push((urlCourse.end - urlCourse.start) / dayLength);
+        });
+        
+        if (urlCourses.length > 0) {
+          setCourses(urlCourses);
+          setClockLabels(urlClockLabels);
+          setClockColors(urlClockColors);
+          setClockSlices(urlClockSlices);
+        }
       }
+      
+      return urlCourses;
     }
+    
+    if (courses.length > 0) return;
+    const urlCourses:any[] = getUrlCourses(coursesString);
     
     const warningAudio = new Audio('./warning.wav');
     currentDate.current = new Date();
-    currentTime.current = currentDate.current.getHours() * 60 + currentDate.current.getMinutes();
     updateTime(urlCourses.length > 0 ? urlCourses : courses);
     setInterval(() => {
       currentDate.current = new Date();
-      currentTime.current = currentDate.current.getHours() * 60 + currentDate.current.getMinutes();
-      updateTime(null, warningAudio);
+      updateTime(getUrlCourses(window.location.search.replace('?courses=', '')), warningAudio);
     }, 5000);
   }, [courses, clockLabels, clockColors, clockSlices, updateTime, coursesString, dayLength]);
   
@@ -322,8 +313,7 @@ export default function HomePage() {
             {currentCourse?.name}
           </Text>
           <Text display={timeLeft > 0 ? "block" : "none"}>
-            {startHour.toFixed(0).padStart(2, '0')}:{startMinutes.toFixed(0).padStart(2, '0')} {startZone}
-            &nbsp;- {endHour.toFixed(0).padStart(2, '0')}:{endMinutes.toFixed(0).padStart(2, '0')} {endZone}
+            {formatTime(currentCourse?.start)} - {formatTime(currentCourse?.end)}
           </Text>
           <Text fw={900} size="xl" c="white" tt="uppercase" mt="md">{timeLeft > 0 ? timeLeft : "Passing period"}</Text>
           <Text fw={900} size="xl" c="white" tt="uppercase" display={timeLeft > 0 ? "block" : "none"}>minutes left</Text>
@@ -334,7 +324,7 @@ export default function HomePage() {
             {nextCourse?.name}
           </Text>
           <Text display={nextCourse ? "block" : "none"}>
-            at {nextHour.toFixed(0).padStart(2, '0')}:{nextMinutes.toFixed(0).padStart(2, '0')} {nextZone}
+            at {formatTime(nextCourse?.start)}
           </Text>
         </Grid.Col>
         <Grid.Col span={{ base: 12 }} display={currentCourse ? "none" : "block"}>
