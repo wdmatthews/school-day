@@ -102,8 +102,6 @@ export default function HomePage() {
     setTimeLeft(newTimeLeft);
   }, [currentDate, courses, dayEnd, dayStart, timeLeft]);
   
-  const coursesString = useSearchParams().get('courses') ?? '';
-  
   useEffect(() => {
     function getUrlCourses(urlString:string) {
       const urlCourses:any[] = [];
@@ -141,7 +139,7 @@ export default function HomePage() {
     }
     
     if (courses.length > 0) return;
-    const urlCourses:any[] = getUrlCourses(coursesString);
+    const urlCourses:any[] = getUrlCourses(window.location.search.replace('?courses=', ''));
     
     const warningAudio = new Audio('./warning.wav');
     currentDate.current = new Date();
@@ -150,7 +148,7 @@ export default function HomePage() {
       currentDate.current = new Date();
       updateTime(getUrlCourses(window.location.search.replace('?courses=', '')), warningAudio);
     }, 5000);
-  }, [courses, clockLabels, clockColors, clockSlices, updateTime, coursesString, dayLength]);
+  }, [courses, clockLabels, clockColors, clockSlices, updateTime, dayLength]);
   
   const colorChoices = [
     '#1c7ed6', '#228be6', '#339af0', '#4dabf7', '#74c0fc',
