@@ -139,7 +139,7 @@ export default function HomePage() {
     }
     
     if (courses.length > 0) return;
-    const urlCourses:any[] = getUrlCourses(window.location.search.replace('?courses=', ''));
+    const urlCourses:any[] = getUrlCourses(window.location.search.replace('?courses=', '').replaceAll('%3B', ';').replaceAll('%7C', '|'));
     
     const warningAudio = new Audio('./warning.wav');
     currentDate.current = new Date();
