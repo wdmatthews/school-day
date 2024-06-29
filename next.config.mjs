@@ -5,6 +5,7 @@ const nextConfig = {
   output: 'export',
   distDir: 'docs',
   basePath: '/school-day',
+  images: { unoptimized: true },
 };
 
 export default nextConfig;

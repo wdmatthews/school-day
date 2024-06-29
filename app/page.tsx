@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import Image from 'next/image';
 import { useRouter, usePathname } from 'next/navigation';
 import { Text, Grid, Card, Paper, Container, TextInput, Checkbox, Radio, Group, Button, Accordion } from '@mantine/core';
 import { useForm } from '@mantine/form';
@@ -50,7 +51,7 @@ export default function HomePage() {
   const [nextCourse, setNextCourse] = useState<any>(null);
   const [handAngle, setHandAngle] = useState(0);
   
-  const currentDate = useRef<Date>(new Date());
+  const currentDate = useRef(new Date());
   
   function formatTime(time:number) {
     let hour = Math.floor(time / 60);
@@ -60,7 +61,7 @@ export default function HomePage() {
     return `${hour.toFixed(0).padStart(2, '0')}:${minutes.toFixed(0).padStart(2, '0')} ${zone}`;
   }
   
-  const updateTime = useCallback((updateCourses:any[] | null, warningAudio?:any) => {
+  const updateTime = useCallback((updateCourses:any[] | null, oldDate:Date, warningAudio?:any) => {
     if (!updateCourses) updateCourses = courses;
     const notificationsCustomization = {
       color: 'white',
@@ -87,7 +88,7 @@ export default function HomePage() {
     setNextCourse(currentCourseIndex < updateCourses.length - 1 ? updateCourses[currentCourseIndex + 1] : null);
     setHandAngle((currentTime - dayStart) / (dayEnd - dayStart) * 360 - 90);
     
-    if (course && timeLeft != newTimeLeft && warningAudio) {
+    if (course && currentDate.current.getMinutes() != oldDate.getMinutes() && warningAudio) {
       if (newTimeLeft === 3 && course.shouldWarn) {
         warningAudio?.play();
         notifications.show({
@@ -100,7 +101,7 @@ export default function HomePage() {
     }
     
     setTimeLeft(newTimeLeft);
-  }, [currentDate, courses, dayEnd, dayStart, timeLeft]);
+  }, [currentDate, courses, dayEnd, dayStart]);
   
   useEffect(() => {
     function getUrlCourses(urlString:string) {
@@ -139,14 +140,15 @@ export default function HomePage() {
     }
     
     if (courses.length > 0) return;
-    const urlCourses:any[] = getUrlCourses(window.location.search.replace('?courses=', '').replaceAll('%3B', ';').replaceAll('%7C', '|').replaceAll('+', ' '));
+    const urlCourses:any[] = getUrlCourses(window.location.search.replace('?courses=', '').replaceAll('%3B', ';').replaceAll('%7C', '|').replaceAll('+', ' ').replaceAll('=', ''));
     
-    const warningAudio = new Audio('./warning.wav');
+    const warningAudio = new Audio('./school-day/warning.wav');
     currentDate.current = new Date();
-    updateTime(urlCourses.length > 0 ? urlCourses : courses);
+    updateTime(urlCourses.length > 0 ? urlCourses : courses, currentDate.current);
     setInterval(() => {
+      const oldDate = currentDate.current;
       currentDate.current = new Date();
-      updateTime(getUrlCourses(window.location.search.replace('?courses=', '').replaceAll('%3B', ';').replaceAll('%7C', '|').replaceAll('+', ' ')), warningAudio);
+      updateTime(getUrlCourses(window.location.search.replace('?courses=', '').replaceAll('%3B', ';').replaceAll('%7C', '|').replaceAll('+', ' ').replaceAll('=', '')), oldDate, warningAudio);
     }, 5000);
   }, [courses, clockLabels, clockColors, clockSlices, updateTime, dayLength]);
   
@@ -157,6 +159,7 @@ export default function HomePage() {
     '#f76707', '#fd7e14', '#ff922b', '#ffa94d', '#ffc078',
     '#f03e3e', '#fa5252', '#ff6b6b', '#ff8787', '#ffa8a8',
     '#7048e8', '#7950f2', '#845ef7', '#9775fa', '#b197fc',
+    '#8d6e63', '#a68274', '#bf9586', '#d9a998', '#f2bdaa',
   ];
   const colorNames = [
     'Blue 1', 'Blue 2', 'Blue 3', 'Blue 4', 'Blue 5',
@@ -165,6 +168,7 @@ export default function HomePage() {
     'Orange 1', 'Orange 2', 'Orange 3', 'Orange 4', 'Orange 5',
     'Red 1', 'Red 2', 'Red 3', 'Red 4', 'Red 5',
     'Purple 1', 'Purple 2', 'Purple 3', 'Purple 4', 'Purple 5',
+    'Brown 1', 'Brown 2', 'Brown 3', 'Brown 4', 'Brown 5',
   ];
   
   const addCourseForm = useForm({
@@ -245,7 +249,7 @@ export default function HomePage() {
     const newCourses = [...courses, course];
     setCourses(newCourses);
     updateURL(newCourses);
-    updateTime(newCourses);
+    updateTime(newCourses, currentDate.current);
   }
   
   function editCourse(courseIndex:number, newCourse:any) {
@@ -253,7 +257,7 @@ export default function HomePage() {
     setCourses(newCourses);
     setOpenCourse(newCourse.name);
     updateURL(newCourses);
-    updateTime(newCourses);
+    updateTime(newCourses, currentDate.current);
   }
   
   function updateEditForm(courseName:string | null) {
@@ -280,7 +284,7 @@ export default function HomePage() {
     const newCourses = courses.filter((course, c) => (c !== courseIndex));
     setCourses(newCourses);
     updateURL(newCourses);
-    updateTime(newCourses);
+    updateTime(newCourses, currentDate.current);
   }
   
   const openDeleteModal = (courseIndex:number) => modals.openConfirmModal({
@@ -304,7 +308,9 @@ export default function HomePage() {
       <Grid align="center" justify="center">
         <Grid.Col span={{ base: 6, md: 4 }} pos="relative" display={currentCourse ? "block" : "none"}>
           <Pie data={clockData} options={clockOptions}></Pie>
-          <Paper bg="white" radius="xl" style={{ position: "absolute", left: "50%", top: "50%", width: "50%", height: "8px", transformOrigin: "4px 4px", translate: "-4px -4px", rotate: `${handAngle}deg` }}></Paper>
+          <Paper bg="white" radius="xl" style={{ position: "absolute", left: "50%", top: "50%", width: "50%", height: "8px", transformOrigin: "4px 4px", translate: "-4px -4px", rotate: `${handAngle}deg`, border: '2px solid #2e2e2e' }}>
+            <Image src="./school-day/arrow.png" alt="clock arrow" width="16" height="16" style={{ position: 'relative', left: 'calc(100% - 8px)', top: '-8px' }} />
+          </Paper>
         </Grid.Col>
         <Grid.Col span={{ base: 6, md: 4 }} display={currentCourse ? "block" : "none"}>
           <Text fw={700} size="xl" c={currentCourse?.color} display={timeLeft > 0 ? "block" : "none"}>
@@ -368,6 +374,12 @@ export default function HomePage() {
             <Group mt="xs">
               {colorChoices.slice(20, 25).map((color, c) => <Radio key={`add-${color}`} value={color} label={colorNames[c + 20]} color={color} />)}
             </Group>
+            <Group mt="xs">
+              {colorChoices.slice(25, 30).map((color, c) => <Radio key={`add-${color}`} value={color} label={colorNames[c + 25]} color={color} />)}
+            </Group>
+            <Group mt="xs">
+              {colorChoices.slice(30, 35).map((color, c) => <Radio key={`add-${color}`} value={color} label={colorNames[c + 30]} color={color} />)}
+            </Group>
           </Radio.Group>
           <TimeInput
             mt="md"
@@ -424,6 +436,12 @@ export default function HomePage() {
                 </Group>
                 <Group mt="xs">
                   {colorChoices.slice(20, 25).map((color, c) => <Radio key={`add-${color}`} value={color} label={colorNames[c + 20]} color={color} />)}
+                </Group>
+                <Group mt="xs">
+                  {colorChoices.slice(25, 30).map((color, c) => <Radio key={`add-${color}`} value={color} label={colorNames[c + 25]} color={color} />)}
+                </Group>
+                <Group mt="xs">
+                  {colorChoices.slice(30, 35).map((color, c) => <Radio key={`add-${color}`} value={color} label={colorNames[c + 30]} color={color} />)}
                 </Group>
               </Radio.Group>
               <TimeInput
