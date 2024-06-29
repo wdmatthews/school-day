@@ -142,7 +142,7 @@ export default function HomePage() {
     if (courses.length > 0) return;
     const urlCourses:any[] = getUrlCourses(window.location.search.replace('?courses=', '').replaceAll('%3B', ';').replaceAll('%7C', '|').replaceAll('+', ' ').replaceAll('=', ''));
     
-    const warningAudio = new Audio('./school-day/warning.wav');
+    const warningAudio = new Audio('./warning.wav');
     currentDate.current = new Date();
     updateTime(urlCourses.length > 0 ? urlCourses : courses, currentDate.current);
     setInterval(() => {
@@ -309,7 +309,7 @@ export default function HomePage() {
         <Grid.Col span={{ base: 6, md: 4 }} pos="relative" display={currentCourse ? "block" : "none"}>
           <Pie data={clockData} options={clockOptions}></Pie>
           <Paper bg="white" radius="xl" style={{ position: "absolute", left: "50%", top: "50%", width: "50%", height: "8px", transformOrigin: "4px 4px", translate: "-4px -4px", rotate: `${handAngle}deg`, border: '2px solid #2e2e2e' }}>
-            <Image src="./school-day/arrow.png" alt="clock arrow" width="16" height="16" style={{ position: 'relative', left: 'calc(100% - 8px)', top: '-8px' }} />
+            <Image src="./arrow.png" alt="clock arrow" width="16" height="16" style={{ position: 'relative', left: 'calc(100% - 8px)', top: '-8px' }} />
           </Paper>
         </Grid.Col>
         <Grid.Col span={{ base: 6, md: 4 }} display={currentCourse ? "block" : "none"}>
