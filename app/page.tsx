@@ -139,14 +139,14 @@ export default function HomePage() {
     }
     
     if (courses.length > 0) return;
-    const urlCourses:any[] = getUrlCourses(window.location.search.replace('?courses=', '').replaceAll('%3B', ';').replaceAll('%7C', '|'));
+    const urlCourses:any[] = getUrlCourses(window.location.search.replace('?courses=', '').replaceAll('%3B', ';').replaceAll('%7C', '|').replaceAll('+', ' '));
     
     const warningAudio = new Audio('./warning.wav');
     currentDate.current = new Date();
     updateTime(urlCourses.length > 0 ? urlCourses : courses);
     setInterval(() => {
       currentDate.current = new Date();
-      updateTime(getUrlCourses(window.location.search.replace('?courses=', '').replaceAll('%3B', ';').replaceAll('%7C', '|')), warningAudio);
+      updateTime(getUrlCourses(window.location.search.replace('?courses=', '').replaceAll('%3B', ';').replaceAll('%7C', '|').replaceAll('+', ' ')), warningAudio);
     }, 5000);
   }, [courses, clockLabels, clockColors, clockSlices, updateTime, dayLength]);
   
