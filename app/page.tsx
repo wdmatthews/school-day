@@ -146,7 +146,7 @@ export default function HomePage() {
     updateTime(urlCourses.length > 0 ? urlCourses : courses);
     setInterval(() => {
       currentDate.current = new Date();
-      updateTime(getUrlCourses(window.location.search.replace('?courses=', '')), warningAudio);
+      updateTime(getUrlCourses(window.location.search.replace('?courses=', '').replaceAll('%3B', ';').replaceAll('%7C', '|')), warningAudio);
     }, 5000);
   }, [courses, clockLabels, clockColors, clockSlices, updateTime, dayLength]);
   
